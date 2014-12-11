@@ -2,71 +2,19 @@ package main
 
 import (
 	"github.com/zeelot/go-ircevent"
+	"github.com/zeelot/zeebot/bot"
+	"github.com/zeelot/zeebot/strategy"
 	"log"
-	"regexp"
+	"strconv"
 	"strings"
+	"time"
 )
 
-type OftbotEvent irc.Event
-
-func (event OftbotEvent) IsGameSuggestion() bool {
-	r, _ := regexp.Compile("^@([a-zA-Z]+) suggests a new game of 1, 4, 24!")
-	return r.MatchString(event.GetMessage())
-}
-
-func (event OftbotEvent) IsTimeToRoll(bot Bot) bool {
-	if !event.IsMessageIntendedFor(bot) {
-		return false
-	}
-
-	r, _ := regexp.Compile("^@([a-zA-Z]+), it's your turn next")
-	if r.MatchString(event.GetMessage()) {
-		return true
-	}
-
-	r, _ = regexp.Compile("^@([a-zA-Z]+), you're up first")
-	if r.MatchString(event.GetMessage()) {
-		return true
-	}
-
-	return false
-}
-
-func (event OftbotEvent) IsTimeToKeep(bot Bot) bool {
-	return event.IsRollBy(bot)
-}
-
-func (event OftbotEvent) GetValuesToKeep() []string {
-	//@Zeelot rolled: 5, 3, 5, 4, 4, 6.
-	r, _ := regexp.Compile("^@[a-zA-Z]+ rolled: ([0-9]), ([0-9]), ([0-9]), ([0-9]), ([0-9]), ([0-9]).$")
-	match := r.FindStringSubmatch(event.GetMessage())
-	return match[1:]
-}
-
-func (event OftbotEvent) IsMessageIntendedFor(bot Bot) bool {
-	pattern := "^@:name, "
-	r, _ := regexp.Compile(strings.Replace(pattern, ":name", bot.Name, 1))
-	return r.MatchString(event.GetMessage())
-}
-
-func (event OftbotEvent) IsRollBy(bot Bot) bool {
-	pattern := "^@:name rolled"
-	r, _ := regexp.Compile(strings.Replace(pattern, ":name", bot.Name, 1))
-	return r.MatchString(event.GetMessage())
-}
-
-func (event OftbotEvent) GetMessage() string {
-	return event.Arguments[1]
-}
-
-type Bot struct {
-	Name string
-}
-
 func main() {
-	bot := Bot{Name: "zeebot"}
+	theBot := bot.Bot{Name: "zeebot-clever"}
+	strategy := strategy.SafeStrategy{}
 
-	irccon1 := irc.IRC(bot.Name, bot.Name)
+	irccon1 := irc.IRC(theBot.Name, theBot.Name)
 	irccon1.VerboseCallbackHandler = true
 	irccon1.Debug = true
 
@@ -77,25 +25,33 @@ func main() {
 
 	irccon1.AddCallback("001", func(e *irc.Event) { irccon1.Join("#cosmic-rift") })
 
-	log.Println("hello")
-
 	irccon1.AddCallback("NOTICE", func(e *irc.Event) {
 		if e.Nick != "oftbot" {
 			return
 		}
 
-		event := OftbotEvent(*e)
+		// Just prevent bots from hammering IRC.
+		time.Sleep(1 * time.Second)
+
+		event := bot.OftbotEvent(*e)
 		if event.IsGameSuggestion() {
+			strategy.Reset()
 			irccon1.Privmsg("#cosmic-rift", "@oftbot join")
+			irccon1.Privmsg("#cosmic-rift", "Strategy: Safe")
 		}
 
-		if event.IsTimeToRoll(bot) {
+		if event.IsTimeToRoll(theBot) {
 			irccon1.Privmsg("#cosmic-rift", "@oftbot roll")
 		}
 
-		if event.IsTimeToKeep(bot) {
+		if event.IsTimeToKeep(theBot) {
 			template := "@oftbot keep :numbers"
-			numbers := strings.Join(event.GetValuesToKeep(), "")
+			toKeep := strategy.ChooseDice(event.GetRollValues())
+			stringNumbers := []string{}
+			for _, intNumber := range toKeep {
+				stringNumbers = append(stringNumbers, strconv.Itoa(intNumber))
+			}
+			numbers := strings.Join(stringNumbers, "")
 			response := strings.Replace(template, ":numbers", numbers, 1)
 			irccon1.Privmsg("#cosmic-rift", response)
 		}

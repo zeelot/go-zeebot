@@ -1,4 +1,4 @@
-package main
+package bot
 
 import (
 	//"fmt"
@@ -51,6 +51,21 @@ func GetSampleTimeToKeepEvent() OftbotEvent {
 	})
 }
 
+func GetSampleSecondRollEvent() OftbotEvent {
+	return OftbotEvent(irc.Event{
+		Code:   "NOTICE",
+		Raw:    ":oftbot!~oftbot@WoPRCentral.jonathan-hanson.org NOTICE #cosmic-rift :@triplepoint rolled: 2, 1, 2, 2, 6.",
+		Nick:   "oftbot",
+		Host:   "WoPRCentral.jonathan-hanson.org",
+		Source: "oftbot!~oftbot@WoPRCentral.jonathan-hanson.org",
+		User:   "~oftbot",
+		Arguments: []string{
+			"#cosmic-rift",
+			"@triplepoint rolled: 2, 1, 2, 2, 6.",
+		},
+	})
+}
+
 func TestOftbotEventCanBeBuilt(t *testing.T) {
 	GetSampleGameSuggestionEvent()
 }
@@ -80,6 +95,21 @@ func TestIsTimeToKeepDetection(t *testing.T) {
 	event := GetSampleTimeToKeepEvent()
 	jonBot := Bot{Name: "triplepoint"}
 	zoBot := Bot{Name: "zeelot"}
+
+	if !event.IsTimeToKeep(jonBot) {
+		t.Fatal("Time to keep detection failed for jon bot")
+	}
+	if event.IsTimeToKeep(zoBot) {
+		t.Fatal("Time to keep detection failed for zo bot")
+	}
+}
+
+func TestSecondRollDetection(t *testing.T) {
+	event := GetSampleSecondRollEvent()
+	jonBot := Bot{Name: "triplepoint"}
+	zoBot := Bot{Name: "zeelot"}
+
+	event.GetRollValues()
 
 	if !event.IsTimeToKeep(jonBot) {
 		t.Fatal("Time to keep detection failed for jon bot")
