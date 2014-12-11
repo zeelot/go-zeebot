@@ -1,4 +1,4 @@
-package strategy
+package game
 
 import (
 	"sort"

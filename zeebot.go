@@ -2,8 +2,7 @@ package main
 
 import (
 	"github.com/zeelot/go-ircevent"
-	"github.com/zeelot/zeebot/bot"
-	"github.com/zeelot/zeebot/strategy"
+	"github.com/zeelot/zeebot/game"
 	"log"
 	"strconv"
 	"strings"
@@ -11,8 +10,8 @@ import (
 )
 
 func main() {
-	theBot := bot.Bot{Name: "zeebot-clever"}
-	strategy := strategy.SafeStrategy{}
+	theBot := game.Bot{Name: "zeebot-clever"}
+	strategy := game.SafeStrategy{}
 
 	irccon1 := irc.IRC(theBot.Name, theBot.Name)
 	irccon1.VerboseCallbackHandler = true
@@ -33,7 +32,7 @@ func main() {
 		// Just prevent bots from hammering IRC.
 		time.Sleep(1 * time.Second)
 
-		event := bot.OftbotEvent(*e)
+		event := game.OftbotEvent(*e)
 		if event.IsGameSuggestion() {
 			strategy.Reset()
 			irccon1.Privmsg("#cosmic-rift", "@oftbot join")
