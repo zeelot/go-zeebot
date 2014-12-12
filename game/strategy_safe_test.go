@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -14,7 +13,7 @@ func TestBehavior(t *testing.T) {
 	games := [][]MockRoll{
 		[]MockRoll{
 			MockRoll{
-				Input:  []int{1, 4, 6, 6, 6},
+				Input:  []int{1, 4, 3, 2, 2},
 				Output: []int{1, 4},
 			},
 			MockRoll{
@@ -24,7 +23,7 @@ func TestBehavior(t *testing.T) {
 		},
 		[]MockRoll{
 			MockRoll{
-				Input:  []int{1, 4, 6, 6, 6},
+				Input:  []int{1, 4, 3, 2, 2},
 				Output: []int{1, 4},
 			},
 			MockRoll{
@@ -61,15 +60,7 @@ func TestBehavior(t *testing.T) {
 		[]MockRoll{
 			MockRoll{
 				Input:  []int{5, 6, 4, 1, 6, 6},
-				Output: []int{1, 4},
-			},
-			MockRoll{
-				Input:  []int{3, 2, 5, 4},
-				Output: []int{5},
-			},
-			MockRoll{
-				Input:  []int{6, 5, 6},
-				Output: []int{6, 6, 5},
+				Output: []int{1, 4, 5, 6, 6, 6},
 			},
 		},
 	}
@@ -79,7 +70,7 @@ func TestBehavior(t *testing.T) {
 		for rollId, roll := range rolls {
 			result := safeStrategy.ChooseDice(roll.Input)
 
-			fmt.Printf("rolled %v and chose %v\n", roll.Input, result)
+			t.Logf("rolled %v and chose %v\n", roll.Input, result)
 
 			if !compare(result, roll.Output) {
 				t.Fatalf("Roll did not result in the right choices(gameId %d rollId %d): %v is not %v", gameId, rollId, result, roll.Output)

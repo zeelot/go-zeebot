@@ -9,44 +9,72 @@ type SafeStrategy struct {
 	HaveFour bool
 }
 
+func NewSafeStrategy() *SafeStrategy {
+	return &SafeStrategy{}
+}
+
 func (strategy *SafeStrategy) Reset() {
 	strategy.HaveOne = false
 	strategy.HaveFour = false
 }
 
 func (strategy *SafeStrategy) ChooseDice(roll []int) []int {
-	var chosen []int
-	if strategy.HaveOne == true && strategy.HaveFour == true {
-		sort.Sort(sort.Reverse(sort.IntSlice(roll)))
-		for _, value := range roll {
-			if value > 4 {
-				// Keep any 5s and 6s
-				chosen = append(chosen, value)
-			}
-			if value == 4 && len(chosen) == 0 {
-				// Keeps the 4s if we haven't kept any yet.
-				chosen = append(chosen, 4)
-			}
+	chosen := map[int]int{}
+	rollCopy := make([]int, len(roll), len(roll))
+	copy(rollCopy, roll)
+	sort.Sort(sort.Reverse(sort.IntSlice(rollCopy)))
+
+	for k, v := range strategy.chooseQualifying(roll) {
+		chosen[k] = v
+	}
+
+	for k, v := range strategy.chooseHighs(roll) {
+		chosen[k] = v
+	}
+
+	if len(chosen) == 0 {
+		// Simply keep the highest one.
+		chosen[0] = rollCopy[0]
+	}
+
+	kept := []int{}
+	for _, v := range chosen {
+		kept = append(kept, v)
+	}
+
+	return kept
+}
+
+func (strategy *SafeStrategy) chooseQualifying(roll []int) map[int]int {
+	chosen := make(map[int]int)
+	if strategy.HaveOne && strategy.HaveFour {
+		return chosen
+	}
+
+	for k, v := range roll {
+		if v == 1 && !strategy.HaveOne {
+			chosen[k] = 1
+			strategy.HaveOne = true
 		}
-		if len(chosen) == 0 {
-			// Simply keep the highest one.
-			chosen = append(chosen, roll[0])
+		if v == 4 && !strategy.HaveFour {
+			chosen[k] = 4
+			strategy.HaveFour = true
 		}
-	} else {
-		sort.Sort(sort.IntSlice(roll))
-		for _, value := range roll {
-			if value == 1 && strategy.HaveOne != true {
-				chosen = append(chosen, 1)
-				strategy.HaveOne = true
-			}
-			if value == 4 && strategy.HaveFour != true {
-				chosen = append(chosen, 4)
-				strategy.HaveFour = true
-			}
-		}
-		if len(chosen) == 0 {
-			// Simply keep the highest one.
-			chosen = append(chosen, roll[len(roll)-1])
+	}
+
+	return chosen
+}
+
+func (strategy *SafeStrategy) chooseHighs(roll []int) map[int]int {
+	chosen := make(map[int]int)
+	if !strategy.HaveOne || !strategy.HaveFour {
+		return chosen
+	}
+
+	for k, v := range roll {
+		if v > 4 {
+			// Keep any 5s and 6s
+			chosen[k] = v
 		}
 	}
 
