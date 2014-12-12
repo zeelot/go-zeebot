@@ -15,7 +15,7 @@ func main() {
 	go game.CreateIRCPlayer(bot2, strategy2)
 
 	for {
-		// Just let the other functions do their thing for ever.
+		// Just let the other functions do their thing forever.
 		time.Sleep(1 * time.Second)
 	}
 }
