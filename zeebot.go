@@ -1,60 +1,21 @@
 package main
 
 import (
-	"github.com/zeelot/go-ircevent"
-	"github.com/zeelot/zeebot/game"
-	"log"
-	"strconv"
-	"strings"
+	"github.com/zeelot/go-zeebot/game"
 	"time"
 )
 
 func main() {
-	theBot := game.Bot{Name: "zeebot-clever"}
-	strategy := game.SafeStrategy{}
+	bot := game.Bot{Name: "zeebot-clever"}
+	strategy := &game.SafeStrategy{}
+	go game.CreateIRCPlayer(bot, strategy)
 
-	irccon1 := irc.IRC(theBot.Name, theBot.Name)
-	irccon1.VerboseCallbackHandler = true
-	irccon1.Debug = true
+	bot2 := game.Bot{Name: "zeebot-dummy"}
+	strategy2 := &game.DummyStrategy{}
+	go game.CreateIRCPlayer(bot2, strategy2)
 
-	err := irccon1.Connect("irc.freenode.net:6667")
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	irccon1.AddCallback("001", func(e *irc.Event) { irccon1.Join("#cosmic-rift") })
-
-	irccon1.AddCallback("NOTICE", func(e *irc.Event) {
-		if e.Nick != "oftbot" {
-			return
-		}
-
-		// Just prevent bots from hammering IRC.
+	for {
+		// Just let the other functions do their thing for ever.
 		time.Sleep(1 * time.Second)
-
-		event := game.OftbotEvent(*e)
-		if event.IsGameSuggestion() {
-			strategy.Reset()
-			irccon1.Privmsg("#cosmic-rift", "@oftbot join")
-			irccon1.Privmsg("#cosmic-rift", "Strategy: Safe")
-		}
-
-		if event.IsTimeToRoll(theBot) {
-			irccon1.Privmsg("#cosmic-rift", "@oftbot roll")
-		}
-
-		if event.IsTimeToKeep(theBot) {
-			template := "@oftbot keep :numbers"
-			toKeep := strategy.ChooseDice(event.GetRollValues())
-			stringNumbers := []string{}
-			for _, intNumber := range toKeep {
-				stringNumbers = append(stringNumbers, strconv.Itoa(intNumber))
-			}
-			numbers := strings.Join(stringNumbers, "")
-			response := strings.Replace(template, ":numbers", numbers, 1)
-			irccon1.Privmsg("#cosmic-rift", response)
-		}
-	})
-
-	irccon1.Loop()
+	}
 }
