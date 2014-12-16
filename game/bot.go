@@ -15,7 +15,7 @@ type Bot struct {
 type OftbotEvent irc.Event
 
 func (event OftbotEvent) IsGameSuggestion() bool {
-	r, _ := regexp.Compile(`^@([a-zA-Z\-_]+) suggests a new game of 1, 4, 24!`)
+	r, _ := regexp.Compile(`^@([^\s\\]+) suggests a new game of 1, 4, 24!`)
 	return r.MatchString(event.GetMessage())
 }
 
@@ -24,12 +24,12 @@ func (event OftbotEvent) IsTimeToRoll(bot Bot) bool {
 		return false
 	}
 
-	r, _ := regexp.Compile(`^@([a-zA-Z\-_]+), it's your turn next`)
+	r, _ := regexp.Compile(`^@([^\s\\]+), it's your turn next`)
 	if r.MatchString(event.GetMessage()) {
 		return true
 	}
 
-	r, _ = regexp.Compile(`^@([a-zA-Z\-_]+), you're up first`)
+	r, _ = regexp.Compile(`^@([^\s\\]+), you're up first`)
 	if r.MatchString(event.GetMessage()) {
 		return true
 	}
@@ -67,6 +67,11 @@ func (event OftbotEvent) IsMessageIntendedFor(bot Bot) bool {
 func (event OftbotEvent) IsRollBy(bot Bot) bool {
 	pattern := "^@:name rolled"
 	r, _ := regexp.Compile(strings.Replace(pattern, ":name", bot.Name, 1))
+	return r.MatchString(event.GetMessage())
+}
+
+func (event OftbotEvent) IsSummonPosseCommand() bool {
+	r, _ := regexp.Compile(`^SUMMON THE POSSE`)
 	return r.MatchString(event.GetMessage())
 }
 

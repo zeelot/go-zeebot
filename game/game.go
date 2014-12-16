@@ -16,7 +16,7 @@ type Player struct {
 func CreateIRCPlayer(bot Bot, strategy Strategy) {
 	irccon1 := irc.IRC(bot.Name, bot.Name)
 	irccon1.VerboseCallbackHandler = true
-	irccon1.Debug = true
+	irccon1.Debug = false
 
 	err := irccon1.Connect("irc.freenode.net:6667")
 	if err != nil {
@@ -31,20 +31,24 @@ func CreateIRCPlayer(bot Bot, strategy Strategy) {
 		}
 
 		// Just prevent bots from hammering IRC.
-		time.Sleep(1 * time.Second)
+		time.Sleep(3 * time.Second)
 
 		event := OftbotEvent(*e)
+		log.Printf("Got event %v\n\n", event.GetMessage())
 		if event.IsGameSuggestion() {
+			log.Println("Detected game suggestion")
 			strategy.Reset()
 			irccon1.Privmsg("#cosmic-rift", "@oftbot join")
 			irccon1.Privmsg("#cosmic-rift", "Strategy: Safe")
 		}
 
 		if event.IsTimeToRoll(bot) {
+			log.Println("Detected time to roll")
 			irccon1.Privmsg("#cosmic-rift", "@oftbot roll")
 		}
 
 		if event.IsTimeToKeep(bot) {
+			log.Println("Detected time to keep")
 			template := "@oftbot keep :numbers"
 			toKeep := strategy.ChooseDice(event.GetRollValues())
 			stringNumbers := []string{}

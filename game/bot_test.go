@@ -24,14 +24,14 @@ func GetSampleGameSuggestionEvent() OftbotEvent {
 func GetSampleTimeToRollEvent() OftbotEvent {
 	return OftbotEvent(irc.Event{
 		Code:   "NOTICE",
-		Raw:    ":oftbot!~oftbot@WoPRCentral.jonathan-hanson.org NOTICE #cosmic-rift :@triplepoint, you're up first.  Type '@oftbot roll' to take your first roll.",
+		Raw:    ":oftbot!~oftbot@WoPRCentral.jonathan-hanson.org NOTICE #cosmic-rift :@zeebot-posse-247, you're up first.  Type '@oftbot roll' to take your first roll.",
 		Nick:   "oftbot",
 		Host:   "WoPRCentral.jonathan-hanson.org",
 		Source: "oftbot!~oftbot@WoPRCentral.jonathan-hanson.org",
 		User:   "~oftbot",
 		Arguments: []string{
 			"#cosmic-rift",
-			"@triplepoint, you're up first.  Type '@oftbot roll' to take your first roll.",
+			"@zeebot-posse-247, you're up first.  Type '@oftbot roll' to take your first roll.",
 		},
 	})
 }
@@ -39,14 +39,14 @@ func GetSampleTimeToRollEvent() OftbotEvent {
 func GetSampleTimeToKeepEvent() OftbotEvent {
 	return OftbotEvent(irc.Event{
 		Code:   "NOTICE",
-		Raw:    ":oftbot!~oftbot@WoPRCentral.jonathan-hanson.org NOTICE #cosmic-rift :@triplepoint rolled: 2, 1, 2, 2, 6, 6.",
+		Raw:    ":oftbot!~oftbot@WoPRCentral.jonathan-hanson.org NOTICE #cosmic-rift :@zeebot-posse-247 rolled: 2, 1, 2, 2, 6, 6.",
 		Nick:   "oftbot",
 		Host:   "WoPRCentral.jonathan-hanson.org",
 		Source: "oftbot!~oftbot@WoPRCentral.jonathan-hanson.org",
 		User:   "~oftbot",
 		Arguments: []string{
 			"#cosmic-rift",
-			"@triplepoint rolled: 2, 1, 2, 2, 6, 6.",
+			"@zeebot-posse-247 rolled: 2, 1, 2, 2, 6, 6.",
 		},
 	})
 }
@@ -54,14 +54,14 @@ func GetSampleTimeToKeepEvent() OftbotEvent {
 func GetSampleSecondRollEvent() OftbotEvent {
 	return OftbotEvent(irc.Event{
 		Code:   "NOTICE",
-		Raw:    ":oftbot!~oftbot@WoPRCentral.jonathan-hanson.org NOTICE #cosmic-rift :@triplepoint rolled: 2, 1, 2, 2, 6.",
+		Raw:    ":oftbot!~oftbot@WoPRCentral.jonathan-hanson.org NOTICE #cosmic-rift :@zeebot-posse-247 rolled: 2, 1, 2, 2, 6.",
 		Nick:   "oftbot",
 		Host:   "WoPRCentral.jonathan-hanson.org",
 		Source: "oftbot!~oftbot@WoPRCentral.jonathan-hanson.org",
 		User:   "~oftbot",
 		Arguments: []string{
 			"#cosmic-rift",
-			"@triplepoint rolled: 2, 1, 2, 2, 6.",
+			"@zeebot-posse-247 rolled: 2, 1, 2, 2, 6.",
 		},
 	})
 }
@@ -80,11 +80,11 @@ func TestMatchGameSuggestion(t *testing.T) {
 
 func TestIsTimeToRollDetection(t *testing.T) {
 	event := GetSampleTimeToRollEvent()
-	jonBot := Bot{Name: "triplepoint"}
+	jonBot := Bot{Name: "zeebot-posse-247"}
 	zoBot := Bot{Name: "zeelot"}
 
 	if !event.IsTimeToRoll(jonBot) {
-		t.Fatal("Time to roll detection failed for jon bot")
+		t.Fatal("Time to roll detection failed for posse bot")
 	}
 	if event.IsTimeToRoll(zoBot) {
 		t.Fatal("Time to roll detection failed for zo bot")
@@ -93,11 +93,11 @@ func TestIsTimeToRollDetection(t *testing.T) {
 
 func TestIsTimeToKeepDetection(t *testing.T) {
 	event := GetSampleTimeToKeepEvent()
-	jonBot := Bot{Name: "triplepoint"}
+	jonBot := Bot{Name: "zeebot-posse-247"}
 	zoBot := Bot{Name: "zeelot"}
 
 	if !event.IsTimeToKeep(jonBot) {
-		t.Fatal("Time to keep detection failed for jon bot")
+		t.Fatal("Time to keep detection failed for posse bot")
 	}
 	if event.IsTimeToKeep(zoBot) {
 		t.Fatal("Time to keep detection failed for zo bot")
@@ -106,13 +106,13 @@ func TestIsTimeToKeepDetection(t *testing.T) {
 
 func TestSecondRollDetection(t *testing.T) {
 	event := GetSampleSecondRollEvent()
-	jonBot := Bot{Name: "triplepoint"}
+	jonBot := Bot{Name: "zeebot-posse-247"}
 	zoBot := Bot{Name: "zeelot"}
 
 	event.GetRollValues()
 
 	if !event.IsTimeToKeep(jonBot) {
-		t.Fatal("Time to keep detection failed for jon bot")
+		t.Fatal("Time to keep detection failed for posse bot")
 	}
 	if event.IsTimeToKeep(zoBot) {
 		t.Fatal("Time to keep detection failed for zo bot")
